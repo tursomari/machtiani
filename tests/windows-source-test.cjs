@@ -1,0 +1,56 @@
+// Offline source isolation and pin checks; no Windows runtime or credentials.
+const { test } = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { execFileSync } = require('node:child_process')
+const { snapshot } = require('../scripts/windows-source.cjs')
+function git(root, ...args) { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim() }
+function repository(root) {
+  fs.mkdirSync(root)
+  git(root, 'init', '-q')
+  git(root, 'config', 'user.name', 'Fixture')
+  git(root, 'config', 'user.email', 'fixture@example.invalid')
+  git(root, 'config', 'commit.gpgsign', 'false')
+  fs.writeFileSync(path.join(root, 'tracked.txt'), 'committed source\n')
+  git(root, 'add', 'tracked.txt'); git(root, 'commit', '-qm', 'fixture')
+}
+test('exports exact recursive source while excluding untracked files and Git administration', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'windows-source-'))
+  try {
+    const source = path.join(root, 'source')
+    repository(source)
+    const child = path.join(root, 'child')
+    repository(child)
+    git(source, '-c', 'protocol.file.allow=always', 'submodule', 'add', child, 'nested/component')
+    git(source, 'commit', '-qam', 'pin component')
+    fs.writeFileSync(path.join(source, '.secrets'), 'fixture-only-not-a-key')
+    fs.writeFileSync(path.join(source, 'nested/component/untracked'), 'untracked')
+    const output = path.join(root, 'snapshot')
+    const revisions = snapshot(source, output)
+    assert.equal(revisions['.'], git(source, 'rev-parse', 'HEAD'))
+    assert.equal(revisions['nested/component'], git(child, 'rev-parse', 'HEAD'))
+    assert.equal(fs.readFileSync(path.join(output, 'nested/component/tracked.txt'), 'utf8'), 'committed source\n')
+    for (const file of ['.secrets', '.git', 'nested/component/.git', 'nested/component/untracked']) assert.equal(fs.existsSync(path.join(output, file)), false)
+    assert.throws(() => snapshot(source, output), /already exists/)
+    assert.throws(() => snapshot(source, path.join(source, 'snapshot')), /outside/)
+    fs.writeFileSync(path.join(source, 'tracked.txt'), 'dirty')
+    assert.throws(() => snapshot(source, path.join(root, 'dirty')), /tracked changes/)
+    git(source, 'checkout', '--', 'tracked.txt')
+    const nested = path.join(source, 'nested/component')
+    git(nested, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-qm', 'drift')
+    assert.throws(() => snapshot(source, path.join(root, 'drift')), /differs from its pin/)
+  } finally { fs.rmSync(root, { recursive: true, force: true }) }
+})
+test('rejects an uninitialized submodule instead of exporting an incomplete product', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'windows-source-'))
+  try {
+    const source = path.join(root, 'source'); repository(source)
+    const oid = git(source, 'rev-parse', 'HEAD')
+    git(source, 'update-index', '--add', '--cacheinfo', `160000,${oid},missing`)
+    git(source, 'commit', '-qm', 'missing component')
+    fs.mkdirSync(path.join(source, 'missing'))
+    assert.throws(() => snapshot(source, path.join(root, 'snapshot')), /Initialize the pinned submodule/)
+  } finally { fs.rmSync(root, { recursive: true, force: true }) }
+})

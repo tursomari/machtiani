@@ -1,0 +1,16 @@
+# Evaluation infrastructure only. Product binaries arrive through curl later.
+FROM golang:1.26.8-bookworm
+RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends openssh-server \
+      python3 curl ca-certificates util-linux \
+    && useradd --create-home --uid 1000 --shell /bin/bash installer \
+    && usermod --password IXE-SSH-KEY-ONLY installer \
+    && mkdir -p /usr/local/libexec /run/ixe /run/sshd \
+    && touch /run/ixe/standard-mode \
+    && test ! -e /nix
+RUN rm -f /etc/ssh/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key.pub \
+      /etc/ssh/ssh_host_ecdsa_key /etc/ssh/ssh_host_ecdsa_key.pub \
+      /etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key.pub
+ENV PATH="/usr/local/bin:/usr/bin:/bin:/home/installer/.local/bin"
+ENTRYPOINT ["/bin/bash", "/usr/local/libexec/ixe-entrypoint"]

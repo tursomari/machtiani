@@ -1,0 +1,154 @@
+#!/bin/sh
+# worktree-setup -- create a linked worktree for parallel submodule development
+#
+# Usage: worktree-setup <submodule-path> <worktree-name> [--guard]
+#
+# The workspace lives under ${TMPDIR:-/tmp} and is disposable. Commit work
+# often.
+
+set -eu
+
+usage() {
+    echo "Usage: worktree-setup <submodule-path> <worktree-name> [--guard]" >&2
+}
+
+if [ "$#" -ne 2 ] && [ "$#" -ne 3 ]; then
+    usage
+    exit 2
+fi
+
+sub=$1
+name=$2
+guard_requested=false
+
+if [ "$#" -eq 3 ]; then
+    if [ "$3" != "--guard" ]; then
+        usage
+        exit 2
+    fi
+    guard_requested=true
+fi
+
+if [ ! -d "$sub" ]; then
+    echo "ERROR: submodule path is not a directory: $sub" >&2
+    exit 1
+fi
+
+inside_worktree=$(git -C "$sub" rev-parse --is-inside-work-tree 2>/dev/null || :)
+if [ "$inside_worktree" != true ]; then
+    echo "ERROR: submodule path is not inside a git worktree: $sub" >&2
+    exit 1
+fi
+
+super=$(git -C "$sub" rev-parse --show-superproject-working-tree 2>/dev/null || :)
+if [ -z "$super" ]; then
+    echo "ERROR: path is not a submodule of a superproject: $sub" >&2
+    exit 1
+fi
+
+case "$name" in
+    ""|*[!A-Za-z0-9._-]*)
+        echo "ERROR: worktree name may contain only A-Z, a-z, 0-9, dot, underscore, and hyphen" >&2
+        exit 1
+        ;;
+esac
+
+tmp_root=${TMPDIR:-/tmp}
+case "$tmp_root" in
+    /*) ;;
+    *)
+        echo "ERROR: TMPDIR must be an absolute path: $tmp_root" >&2
+        exit 1
+        ;;
+esac
+if [ ! -d "$tmp_root" ] || [ ! -w "$tmp_root" ]; then
+    echo "ERROR: temporary directory is not writable: $tmp_root" >&2
+    exit 1
+fi
+tmp_root=$(CDPATH='' cd -- "$tmp_root" && pwd)
+
+sub=$(CDPATH='' cd -- "$sub" && pwd)
+sub_label=$(basename "$sub")
+case "$sub/" in
+    "$super/"*) name_rel=${sub#"$super/"} ;;
+    *)
+        echo "ERROR: submodule path is outside its reported superproject: $sub" >&2
+        exit 1
+        ;;
+esac
+
+worktree_config=$(git -C "$sub" config --bool extensions.worktreeConfig 2>/dev/null || :)
+if [ "$worktree_config" = true ]; then
+    common=$(git -C "$sub" rev-parse --path-format=absolute --git-common-dir)
+    if git config --file "$common/config" --get core.worktree >/dev/null 2>&1; then
+        echo "ERROR: extensions.worktreeConfig is enabled, but core.worktree remains in the shared config" >&2
+        echo "Move core.worktree to the primary checkout's config.worktree as documented by git-worktree(1), then retry." >&2
+        exit 1
+    fi
+fi
+
+if ! base=$(git -C "$super" rev-parse "HEAD:$name_rel"); then
+    echo "ERROR: cannot resolve umbrella pin HEAD:$name_rel" >&2
+    exit 1
+fi
+
+if ! git -C "$sub" cat-file -e "$base^{commit}" 2>/dev/null; then
+    echo "ERROR: umbrella pin is not an available commit in $sub: $base" >&2
+    exit 1
+fi
+
+branch="wt/$name"
+wt="$tmp_root/wt-$sub_label-$name"
+sidecar="$wt.base"
+
+if [ -e "$wt" ] || [ -L "$wt" ]; then
+    echo "ERROR: worktree path already exists: $wt" >&2
+    exit 1
+fi
+
+if [ -e "$sidecar" ] || [ -L "$sidecar" ]; then
+    echo "ERROR: worktree sidecar already exists: $sidecar" >&2
+    exit 1
+fi
+
+if git -C "$sub" show-ref --verify --quiet "refs/heads/$branch"; then
+    echo "ERROR: branch already exists and will not be reused: $branch" >&2
+    exit 1
+fi
+
+git -C "$sub" worktree add -b "$branch" "$wt" "$base"
+
+{
+    printf 'base=%s\n' "$base"
+    printf 'name=%s\n' "$name"
+    printf 'sub=%s\n' "$sub"
+} > "$sidecar"
+
+guard_status="off (not requested)"
+if [ "$guard_requested" = true ]; then
+    if [ "$worktree_config" = true ]; then
+        guard_dir="$wt.guard-hooks"
+        mkdir "$guard_dir"
+        cat > "$guard_dir/pre-push" <<'EOF'
+#!/bin/sh
+echo "push guard: pushes from parallel worktrees are disabled; stop and ask" >&2
+exit 1
+EOF
+        chmod +x "$guard_dir/pre-push"
+        git -C "$wt" config --worktree core.hooksPath "$guard_dir"
+        printf 'guard=%s\n' "$guard_dir" >> "$sidecar"
+        guard_status="enabled ($guard_dir)"
+    else
+        echo "NOTICE: --guard skipped because extensions.worktreeConfig is not enabled; the runbook no-push rule still applies" >&2
+        guard_status="skipped (per-worktree config is not enabled)"
+    fi
+fi
+
+short_base=$(git -C "$sub" rev-parse --short "$base")
+printf 'Submodule: %s\n' "$sub"
+printf 'Base OID: %s\n' "$short_base"
+printf 'Branch: %s\n' "$branch"
+printf 'Worktree: %s\n' "$wt"
+printf 'Sidecar: %s\n' "$sidecar"
+printf 'Push guard: %s\n' "$guard_status"
+printf '%s\n' "Reminder: all pushes are forbidden."

@@ -1,6 +1,9 @@
-[submodule "machtiani-commit-file-retrieval"]
-	path = machtiani-commit-file-retrieval
-	url = https://github.com/tursomari/machtiani-commit-file-retrieval
-[submodule "git-server"]
-	path = git-server
-	url = https://github.com/tursomari/git-server
+[submodule "dearmachine"]
+	path = dearmachine
+	url = https://github.com/tursomari/dearmachine.git
+[submodule "machtiani-harness"]
+	path = machtiani-harness
+	url = https://github.com/tursomari/machtiani-harness.git
+[submodule "dearmachine-concierge"]
+	path = dearmachine-concierge
+	url = https://github.com/tursomari/dearmachine-concierge.git

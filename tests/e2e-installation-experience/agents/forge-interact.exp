@@ -1,0 +1,42 @@
+#!/usr/bin/expect -f
+
+if {$argc != 1} {
+  puts stderr "usage: ixe-forge-interact INSTALL.md"
+  exit 2
+}
+
+set prompt_path [lindex $argv 0]
+if {![file isfile $prompt_path] || ![file readable $prompt_path]} {
+  puts stderr "cannot read Forge installation prompt: $prompt_path"
+  exit 2
+}
+set install_name [file tail $prompt_path]
+set install_prompt "Follow @\[$install_name\] exactly."
+
+set timeout 30
+spawn -noecho forge --directory "$env(HOME)/machtiani"
+expect {
+  -re {Initialize [0-9a-f-]+} {}
+  timeout {
+    puts stderr "Forge did not reach its first interactive prompt"
+    exit 1
+  }
+  eof {
+    puts stderr "Forge exited before its first interactive prompt"
+    exit 1
+  }
+}
+
+# Attach the contract to one short message after rustyline owns the terminal.
+# Sending the file itself would queue each line as a separate human turn.
+after 250
+send -- $install_prompt
+send -- "\r"
+
+set timeout -1
+interact
+catch wait result
+if {[llength $result] >= 4} {
+  exit [lindex $result 3]
+}
+exit 1

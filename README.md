@@ -1,445 +1,172 @@
-# machtiani
+<img src="assets/dear-user.svg" alt="Dear User," width="240" />
 
-**Machtiani (mct)** is an experimental terminal based, locally ran code chat service. It's designed to work with real projects. Thousands of commits. Thousands of files. For most cases, you’ll get faster, higher quality answers at a fraction of the cost than token-guzzling alternatives. If you run a local model on your laptop, you won't find anything better.
+**Email your computer. It will email you back using the agents you already know and use, with attachments and group conversations. Threads and sessions are the same thing, and you can use your favorite agent, or combinations of them, in any email thread.**
 
-So why vibe when you can fly?
+**Dear Machine** is the local client that lets you email back and forth with your computer. **Machtiani** is the experimental harness underneath it, using iteration to manage long-running sessions without compaction. Its memory model is simple and effective, leveraging git.
 
-- Efficiently finds right answer based on precise context out of thousands of files in a project.
-- Choose any API provider that adheres to OpenAI API spec, including locally ran ollama or mxl-lm.
-- Stands on own, but composes in the terminal with other command line tools, such Codex.
-- Enjoy this demo video  👉 [mct intro](https://vimeo.com/1082494564/fce3fc7b6a)<div style="display: flex; align-items: center; text-align: left;">
+<img src="assets/check.svg" alt="Yes" width="16" />&nbsp;&nbsp;Use your existing email address (Gmail, etc.) to email your computer, with attachments.
 
-## mct <img src="images/heart-svgrepo-com.svg" alt="heart" width="20" style="vertical-align:middle; margin:0 0.2em;"/> codex
+<img src="assets/check.svg" alt="Yes" width="16" />&nbsp;&nbsp;Securely add others, including agents, to a group email conversation and with as many simultaneous threads as you want.
 
-**Combine the strongest strengths with `--mode answer-only`:**
+<img src="assets/check.svg" alt="Yes" width="16" />&nbsp;&nbsp;Remembers what you're working on with local, non-cloud-based memory.
 
-- `mct` excels at understanding large, real codebases — grabbing the _right_ context and returning exactly what needs to be changed, with file paths and functions — at minimal token cost.
-- `codex` is a superb executor for code implementation, refactor, and test runs, but works best when given precise instructions and context.
+<img src="assets/check.svg" alt="Yes" width="16" />&nbsp;&nbsp;Use your favorite agents already installed (Claude Code, Codex CLI, OMP, etc.), and with whatever sandboxing you want.
 
-### Example: Compose for Peak Productivity
-
-```bash
-# Use mct to derive a minimal, context-aware plan and feed it directly to codex:
-codex "$(mct \"Add error handling for API calls\" --mode answer-only --model Qwen2.5-Coder-7B-Instruct-Q6)"
-```
-
-- **Mix match models:** have `mct` do the heavy lifting with any model of your choice, while codex uses o4-mini (or whatever you want) to implement.
-- **Lower token usage.** `mct`'s highly targeted planning leverages the code/project structure, so LLMs do less redundant thought and token looping.
-- **Win/Win:**
-  - *Best case*: `codex` can implement the change directly, with step-by-step details and file paths distilled by `mct` — bypassing expensive, imprecise code search.
-  - *Worst case*: `codex` still benefits by having all ambiguity boiled out, so it simply fills in implementation details.
-- **Result:** Faster, more precise, and _cheaper_ answers for big projects. When you combine their strengths, you waste less time, fewer tokens — and get more reliable automation at the CLI.
-
-## Quick Launch
-
-1. Clone this project.
-
-   ```bash
-   git clone --recurse-submodules https://github.com/tursomari/machtiani
-   ```
-
-2. Install `mct`
-
-   ```bash
-   cd mct
-   go install \
-     -ldflags="$(go run ./generate_ldflags)" \
-     ./cmd/mct
-   cd -
-   ```
-
-   If you're curious, `-ldflags` runs `mct/generate_ldflags/main.go` to set the version (git OID) so that `mct` can let you know if you're using an incompatible version of the local chat service.
+<img src="assets/check.svg" alt="Yes" width="16" />&nbsp;&nbsp;Watch the work on your computer by running `machtiani run --attach` on the terminal, if you want.
 
 
-   If `mct` command isn't found, run this and/or add it as a line in your `~/.bashrc`, `~/.zshrc` or whatever you use for a shell.
-
-   ```
-   export PATH="$PATH:$(go env GOPATH)/bin"
-   ```
-
-3. Launch the local chat service.
-
-   Make sure n machtiani project root directory where `docker-compose.yml` resides.
-
-   ```bash
-   docker-compose up --build --remove-orphans
-   ```
-
-4. Set your OpenAI api key and base url.
-
-   ```
-   export MCT_MODEL_BASE_URL="https://api.openai.com/v1"
-   export MCT_MODEL_API_KEY=sk...
-   ```
-
-   If you're using another API provider, for example OpenRouter.
-
-   ```
-   export MCT_MODEL_BASE_URL="https://openrouter.ai/api/v1"
-   export MCT_MODEL_API_KEY=sk...
-   ```
-
-   If the git remote url (e.g. on Github) of the project you intend to use `mct` with is private (i.e., requires password or api key).
-
-   ```
-   export CODE_HOST_API_KEY=ghp...
-   ```
-
-   This works for any codehost, so it's not locked into Github.
-
-5. Put a project on machtiani.
-
-   In a git project you want to work on, run
-
-   ```bash
-   mct sync --model google/gemini-2.0-flash-001 --model-threads 10
-   ```
-   **USE A LOW COST** and fast model when syncing. If you use Claude or something for syncing, you're just wasting money and time.
-
-   Also, it will only work if you have a git remote origin as a http/s urls (no ssh), at the moment.
-
-   Give it time to finish. Run `mct status` to check back if completed.
-
-6. Chat with the project
+You only need to remember 2 things. The email address to the computer and the command `dearmachine` to run on the computer's terminal to manage the Dear Machine client and to get help.
 
 
-   ```bash
-   mct "Ask whatever you want here" --model anthropic/claude-3.7-sonnet:thinking
-   ```
+## Install - Linux, macOS or Windows
 
-7. Sync any new commits you pushed to your remote `origin`.
-
-   ```bash
-   mct sync --model gpt-4o-mini --model-threads 10
-   ```
-
-   Any local git commits must be pushed to the git remote for `mct` to sync it.
-
-
-***Local LLMs and quantized models***
-
-See the [llama.cpp guide for Linux users](docs/llama-cpp.md) or the [MLX-LM guide for Mac users](docs/mlx-lm.md) for setup and best practices if you plan to use mct with a local model instead of an API provider.
-
-***Local git-servers***
-
-See here if the project you want to chat to is purely local and not on Github or other codehosts.
-
-## Configuration
-
-Machtiani can be driven either by environment variables **or** by a YML machtiani-config file. Environment variables always win if set, but if you prefer to keep your keys and URLs in a file, you can place a `.machtiani-config.yml` in one of two locations:
-
-1. **Project-local**
-   `<your‐repo‐root>/.machtiani-config.yml`
-2. **Home directory**
-   `~/.machtiani-config.yml`
-
-Lookup and precedence:
-
-1. If you set an env var (for example `MCT_MODEL_API_KEY`), it always overrides any value from a config file.
-2. Otherwise mct will look for **project-local** `./.machtiani-config.yml` first.
-3. Failing that, it will fall back to your **home** `~/.machtiani-config.yml`.
-4. If neither exists you must use env vars.
-
-Supported keys in the yaml are exactly the same names as the env vars:
-
-Example of a project-local file (`./.machtiani-config.yml`):
-
-```yml
-environment:
-  MCT_MODEL_BASE_URL: "https://api.openai.com/v1"
-  MCT_MODEL_API_KEY: "sk-REPLACE_WITH_YOURS"
-  CODE_HOST_API_KEY: "ghp-REPLACE_WITH_YOURS"
-}
-```
-
-You can omit any key that you still prefer to supply via `export`. Any missing key will simply fall back to its corresponding environment variable (or error out if not set anywhere).
-
-## How it Works
-
-Let's sync the commits a project. You must do this whether you have one initial commit or 1,000 commits in history (or more). It will make some inference requests, then **locally** generate and save some embeddings (cpu + 8GB RAM is just fine).
-
-First, navigate to the directory where the git project resides.
+On Linux or macOS (macOS also needs Apple's Command Line Tools):
 
 ```bash
-mct sync --model gpt-4o-mini --model-threads 10
+curl -fsSL https://github.com/tursomari/machtiani/releases/latest/download/install.sh | sh
 ```
 
-Initial sync of a fresh project to mct of a few hundred commits will take a couple minutes and cost few pennies (default is gpt-4o-mini). But once it's done it's done. It saves the data locally.
 
-***Time and cost is practically nothing on incremental syncs on new commits.*** You can sync as many commits as needed (thousands upon thousands).
+On Windows, in PowerShell:
 
-> **Speed Up Your Syncs**: The sync process is only constrained by how many requests per second you can make to your LLM provider. By increasing `--model-threads`, you can dramatically speed up syncing. For example, OpenRouter allows 1 request per second for every credit available on your account. With adequate credits and a capable system, using `--model-threads 100` could sync thousands of commits in seconds rather than minutes.
+```powershell
+irm https://github.com/tursomari/machtiani/releases/latest/download/install.ps1 -OutFile install.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+```
 
+Then open a new terminal and run `dearmachine` to start guided setup.
+
+Or instead do the below if you want to build yourself, which is recommended (includes Nix support).
+
+## Or install from source (Nix also supported)
+
+Clone the project, including its pinned submodules. On Windows, use PowerShell.
 
 ```bash
-mct [prompt] --model gpt-4o-mini
+git clone --recurse-submodules https://github.com/tursomari/machtiani.git
+cd machtiani
 ```
+Follow the BYOC or Concierge installation method. Either will guide you through setup in natural language. And it can manage Dear Machine for you long after.
 
-It will apply code changes, if applicable. If it's not in git, **it doesn't exist**. Just remember that. So if you want to agentically run tests, or some other follow up workflow, use Codex. Codex can also more easily investigate '90% there' or run tests on a slam-dunk by mct, then trying itself from scratch (expensive and gets confused when it gets more complicated).
+### Bring Your Own Concierge (BYOC)
 
-Now you can choose any model. If you have OpenRouter, you can use any openrouter model. Otherwise, plug in whatever your provider offers and it complies with OpenAI API format.
+For example in `machtiani` directory, on Linux, Nix, macOS, or Windows:
 
 ```bash
-mct [prompt] --model deepseek/deepseek-r1
+claude "Read BYOC.md and follow it."
+codex "Read BYOC.md and follow it."
+omp "Read BYOC.md and follow it."
 ```
 
-Also, you can choose for it not to edit or create new files based on the conversation.
+You can ask it to do a Nix install even if you don't have NixOS.
+
+After install if you ever need to do anything, just do something like
 
 ```bash
-mct [prompt] --mode chat --model gpt-4o-mini
+codex "Read BYOC.md. I have some tasks and questions for you."
 ```
 
-## FYI
+For example to add a new email address, changing models, etc,.
 
-If we do `mct sync` with `amplify` flag, it will drastically increase the accuracy. This is a bail out if your commit history is poor and not well organized, but it costs more. Or if you want to guaranteee absolute peak performance.
+You can also ask it how it works and how to run Dear Machine and Machtiani commands yourself.
+
+If you prefer to use the concierge instead, see below.
+
+### Concierge
+
+In case you don't have an agent already installed or prefer to use the Dear Machine concierge.
+
+#### Nix — Linux and macOS (recommended)
+
+You don't need NixOS. You need Nix 2.24+ with flakes enabled.
 
 ```bash
-mct sync --amplify low --model gpt-4o-mini --model-threads 10
+nix run ./dearmachine-concierge -- quick-start --source-root "$PWD"
 ```
 
-`sync --amplify low` is about 2 times more costly and somewhat slower.
+#### Standard — Linux and macOS
 
-For example, say we have 15,000 commits. With low amplification, that would be about $0.50 with gpt-4o-mini (default).
-
-But we could instead
+You'll need Python 3. On Linux x86-64, you'll also need Docker with Buildx. On macOS, you need Apple's Command Line Tools (`xcode-select --install` if missing); Docker isn't needed.
 
 ```bash
-mct sync --amplify high --depth 5000 --model gpt-4o-mini --model-threads 10
+installer=$(sh scripts/build-standard.sh --bootstrap) &&
+  "$installer" quick-start --method standard --source-root "$PWD"
 ```
 
-And that would only sync the most 5000 commits.
+This builds the installer, then runs it if the build succeeds. On Linux, Docker builds the binaries; it isn't needed for normal operation. See [Linux Docker build details](docs/container-build-installation.md).
 
-But let's scratch that for a sec and say we want all the commits available to machtiani. We could sync 9,999 of the oldest to newest.
+#### Windows
+
+On Windows 11 x64, run this in native x64 PowerShell:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\quick-start.ps1
+```
+
+Dear Machine walks you through models and providers, agent backends, your email inbox, and pairing. It automatically configures the inbox with AgentMail (US-based), OpenMail (EU-native), or Sendmux. Then email your computer its first task:
+
+> Take a look at [your project]. What changed recently, and what are some outstanding issues?
+
+## Using it
+
+After setup, Dear Machine runs in the background; you can close the concierge and its terminal. Run `dearmachine` anytime to configure or manage models, providers, backends, inboxes, and updates.
+
+**At my desk.** I'll email my computer on the side while working with Claude Code on something in a tight loop. Usually I'll have a couple of terminal tabs open watching my email work progress:
 
 ```bash
-git checkout HEAD~5000
-mct sync --model gpt-4o-mini --model-threads 10
+machtiani run --attach --session-id "<session-id-from-email-thread>"
 ```
 
-Then to sync the most recent 5001 commits
+**Away from my desk.** Email my computer, mostly via my phone.
+
+**Work emergencies.** Panic email my computer, mostly via my phone.
+
+You can also run Machtiani directly in your project after setup:
 
 ```bash
-git checkout master
-mct sync --amplify low --model gpt-4o-mini --model-threads 10
+machtiani init
+machtiani run --mode code -p "Summarize this project and suggest a useful next step."
 ```
 
-That way we have full coverage.
+See the [Machtiani guide](docs/machtiani-guide.md) for more.
 
-## Peak Performance
+## How Machtiani works
 
-`sync --amplify high` is about **20 times more costly and 5 times slower**, compared to only **2 times** the cost and somewhat slower with `low`.
+Working tightly coupled to an agent in the terminal is different from managing several tasks concurrently, and with others. The shell is foundational for computer work; email brings threads and collaboration to that work.
 
-So it's always a good option for incremental syncs and will make sure you have peak performance going forward, or if you're not terribly cost sensitive for initial syncs.
+<p align="center">
+  &nbsp;&nbsp;
+  <a href="https://vimeo.com/1231158099?share=copy&fl=sv&fe=ci"><img src="assets/demo-thumbnail.svg" alt="Watch the Dear Machtiani demo on Vimeo: using email on a phone" width="210" /></a>
+  &nbsp;&nbsp;
+  <a href="assets/email-replies.png"><img src="assets/email-replies.png" alt="An email conversation: Codex and Forge reply with a joke about the project" width="179" /></a>
+</p>
 
-## mct CLI Usage
+Machtiani's instructor (the iterative planner) repeatedly dispatches a simple but powerful ReAct worker to task your agents. The worker inherits the instructor's accumulated context, but not its system instructions, and runs in an isolated continuation. Only its answer comes back. This hierarchical, asymmetric flow leaves the instructor unburdened by the worker's shell commands, tool calls, and other agents' execution histories.
 
-### Overview
+The instructor, ReAct worker, and backend agents can each use independent models and configurations. Each has targeted instructions; you choose the agents and sandboxing.
 
-The machtiani cli `mct` allows you to interact with the project through command-line parameters. You can provide a markdown file or a prompt directly via the command line, along with various options such as the project name, model type, match strength, and mode of operation.
+Each kick-off can run for one turn or many depending on the task complexity. Reply in the same thread to continue or change the goal, while other threads carry on independently.
 
-### Command Structure
+For more on the reasoning behind this, see the [blog](https://machtiani.chat).
 
-```bash
-mct [prompt] [flags]
-```
+## Use with OpenClaw-like agents
 
-### Flags
+Create an email account for your self-hosted agent with AgentMail, OpenMail, Sendmux, or another provider. Then have it email your computers via Dear Machine when it needs work done or needs information from them.
 
-Common flags when chatting with a project:
+## What's inside
 
-- `--file <path>`            Use a markdown file as the conversation prompt.
-- `--model <string>`         LLM model name (e.g. gpt-4o-mini, deepseek/deepseek-r1). Default: `gpt-4o-mini`.
-- `--match-strength <level>` Context match strength (`high`, `mid`, `low`). Default: `mid`.
-- `--mode <mode>`            Retrieval mode (`chat`, `pure-chat`, `answer-only`). Default: `commit`.
-- `--force`                  Skip confirmation prompts.
-- `--verbose`                Enable verbose logging.
+This umbrella repository holds the glue, tests, and scripts. The product lives in three pinned submodules: [Dear Machine](dearmachine), the [Machtiani harness](machtiani-harness), and the [installer](dearmachine-concierge).
 
-Sync (`mct sync`) and remove (`mct remove`) commands support additional flags such as `--model-threads`, `--amplify`, `--depth`, `--cost-only`, etc. For the
-full list of flags and detailed usage, run:
+The project is mostly Go, with a TypeScript installer, shell, and the TLA+ specifications and Gobra contracts used to check [Dear Machine's guest authorization](https://github.com/tursomari/dearmachine/blob/main/verification/guest/README.md). GitHub's language bar covers only this umbrella repository, about 8% of the project.
 
-```bash
-mct help
-```
+<p align="center">
+  <a href="assets/code-stats-current.svg"><img src="assets/code-stats-current.svg" alt="Code breakdown across the four repositories: 67% Go, 16% TypeScript, 10% Shell and 5% Python, plus 1,150 lines of TLA+ specifications and other source" width="880" /></a>
+</p>
 
-### Example Usage
+## License
 
-1. **Providing a direct prompt, without apply git patches:**
+MIT. See [LICENSE](LICENSE).
 
-   ```bash
-   mct "Add a new endpoint to get stats." --model gpt-4o-mini --mode chat
-   ```
+This is the major upgrade we promised, over a year after the initial debut, and the first update since. Thanks for the support that let me focus.
 
-2. **Using an existing markdown chat file:**
-   ```bash
-   mct --file .machtiani/chat/add_state_endpoint.md --model gpt-4o-mini
-   ```
-
-3. **Make it more selective to reduce context size:**
-
-   ```bash
-   mct "Add a new endpoint to get stats." --model gpt-4o --match-strength high
-   ```
-
-4. **Using the `--force` flag to skip confirmation:**
-
-   ```bash
-   mct sync --force --model gpt-4o-mini --model-threads 10
-   ```
-
-### Different Modes
-
-In default `commit` mode, it searches commits for possible files to help answer the prompt. In `pure-chat` mode, it does not retrieve any files. In `chat` mode, it doesn't apply implement changes with git patches.
-
-#### `sync`
-
-The `sync` command is used to sync machtiani with the project's git..
-
-**Usage:**
-```bash
-mct sync [--force] [--cost-only] [--model MODEL] [--model-threads NUM] [--amplify LEVEL] [--depth NUM]
-```
-
-**Parameters:**
-- `--model` (optional): Specify which LLM to use (e.g., `gpt-4o-mini`, `gpt-4o`). Default is `gpt-4o-mini`.
-- `--model-threads` (optional): Number of concurrent LLM requests to make during sync. Higher values mean faster syncing but require more API throughput and system resources.
-- `--amplify` (optional): Amplification level (`off`, `low`, `mid`, `high`). Higher levels improve accuracy but increase cost.
-- `--depth` (optional): Number of commits to sync, starting from the most recent.
-- `--force` (optional): Skip confirmation prompts.
-- `--cost-only` (optional): Estimate token usage without performing the actual sync.
-
-**Example:**
-```bash
-mct sync --model gpt-4o-mini --model-threads 10 --amplify low --force
-```
-
-If you just want to estimate how many tokens it will require to sync:
-
-```bash
-mct sync --cost-only --model gpt-4o-mini
-```
-
-### `remove`
-
-The `remove` command allows you to remove a repository from the Machtiani system.
-
-**Usage:**
-```bash
-mct remove [--force]
-```
-
-**Example:**
-```bash
-mct remove
-```
-
-### Ignoring Files with `.machtiani.ignore`
-
-You can ignore any binary files by providing the full path, such as images, etc. To exclude specific files from being processed by the application, you can create a `.machtiani.ignore` file in the root of your project directory. The files listed in this file will be ignored during the retrieval process.
-
-#### Example `.machtiani.ignore` file:
-```
-poetry.lock
-go.sum
-go.mod
-```
-
-### Output
-
-The CLI will stream the response and save the chat in `.machtiani/chat/` in the directory you ran the prompt. It also gives a descriptive name to the chat file for you convenience
-
-## Developer Section
-
-### End-to-End Tests
-
-This project includes several end-to-end tests that validate the functionality of the Machtiani commands, with `test_end_to_end.py` serving as the **defacto test** for the application.
-
-#### Setup
-
-1. Make sure you have `git lfs` installed.
-
-   You can use your systems package manager or whatever is best for you.
-
-   Make sure to run after doing the above.
-
-   ```bash
-   git lfs install
-   ```
-
-   Make sure to run after doing the above.
-
-   `git lfs install`
-
-2. **Create and activate a Python virtual environment in the project root:**
-
-   ```bash
-   python3 -m venv venv  # Create a virtual environment named 'venv'
-   source venv/bin/activate  # Activate the virtual environment (Linux/macOS)
-   ```
-
-3. **Install test dependencies using Poetry:**
-
-   Navigate to the project root dir and run:
-
-   ```bash
-   poetry install
-   ```
-
-4. Install `all-MiniLM-L6-v2` into `end-to-end-tests/data/`
-
-   ```
-   cd end-to-end-tests/data
-   git clone https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
-   ```
-   It's a distilled Sentence-BERT embedding model. And it will work just fine on the cpus of a laptop.
-
-   This is used to help test whether generated git messages by machtiani are in the ballpark of being correct using a cosine similarity threshold.
-
-5. Clone `chastler` and `machtiani` into `end-to-end-tests/data/git-projects`
-
-   ```
-   cd end-to-end-tests/data/git-projects
-   git clone https://github.com/7db9a/chastler
-   git clone --branch end-to-end-test --single-branch https://github.com/7db9a/machtiani-end-to-end-test
-   ```
-
-   Unless you have the codheost keys for the repo, this may not work.
-
-#### Running the Defacto Tests
-
-To run the end-to-end test suite from inside `end-to-end-tests` directory:
-
-```bash
-python -m unittest test_end_to_end test_end_to_end_extra
-```
-
-`test_end_to_end_no_codehost_api_key` is no longer useful as count tokens requires auto-deletion of the repo on dry-run on initialization.
-
-#### Why `test_end_to_end.py` is the Defacto Test
-
-- **Comprehensive Coverage**: This test suite encompasses multiple critical functionalities of the Machtiani CLI, including the `git-store`, prompt handling, and synchronization with remote repositories. By running this test, you verify the overall integration and behavior of the CLI tool in a realistic scenario.
-
-- **Realistic Environment**: The tests are designed to execute in a realistic environment, mimicking actual user interactions with the CLI. This helps in identifying issues that may not be apparent in isolated unit tests.
-
-- **Validation of Core Features**: As it encompasses key functionalities, running this test ensures that the essential features of Machtiani are working as expected.
-
-This command prioritizes the most critical integration tests, ensuring that your core functionalities more cost effectively (only a single round of setup and teardown).
-
-### Other Tests
-
-In addition to `test_end_to_end.py`, there are other tests available, such a below. However, it is recommended to prioritize the defacto tests above for a more focused validation of the core features. There no guarantee that the other tests will be maintained or its documentation kept up-to-date.
-
-1. **Test for `git-store`**
-
-   - **File**: `end-to-end-tests/test_git_store.py`
-   - **Description**: Verifies the `git-store` command functionality.
-
-2. **Test for Prompt Command**
-
-   - **File**: `end-to-end-tests/test_prompt_command.py`
-   - **Description**: Validates the behavior of the prompt command when querying specific questions.
-
-To run all tests, you can still use:
-
-```bash
-python -m unittest discover .
-```
+<img src="assets/sincerely.svg" alt="Sincerely, Machtiani Creator" width="340" />

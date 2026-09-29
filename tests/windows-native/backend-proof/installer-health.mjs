@@ -1,0 +1,12 @@
+import {pathToFileURL} from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs';
+const root=path.join(process.env.LOCALAPPDATA,'Dear Machine Ω');
+const {AgentManagerBackendAdapter}=await import(pathToFileURL(path.join(root,'runtime/installer/packages/backend-adapter/dist/index.mjs')));
+const adapter=new AgentManagerBackendAdapter({providerEnvironmentPath:path.join(process.env.USERPROFILE,'windows-proof/backend-proof/providers.env'),providerEnvironmentBackendIds:['omp','claude','forge'],managerCommand:[path.join(root,'bin/agent-manager.exe')]});
+const found=await adapter.discover();
+const ready=await adapter.check(found.filter(c=>['omp','claude','forge'].includes(c.id)));
+const result={found,ready};
+fs.writeFileSync(path.join(process.env.USERPROFILE,'windows-proof/backend-proof/installer-health.json'),JSON.stringify(result,null,2));
+console.log(JSON.stringify(result,null,2));
+if(ready.length!==3||ready.some(c=>c.status!=='ready'))process.exitCode=1;
