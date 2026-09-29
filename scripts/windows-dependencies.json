@@ -1,0 +1,38 @@
+{
+  "node": {
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-win-x64.zip",
+    "sha256": "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73",
+    "format": "zip",
+    "directory": "node-v24.19.0-win-x64"
+  },
+  "go": {
+    "url": "https://go.dev/dl/go1.26.8.windows-amd64.zip",
+    "sha256": "b92c3b2adae85a11ba71fe7216daf0d84e82af4c8ab6c5625807f28622043a59",
+    "format": "zip",
+    "directory": "go"
+  },
+  "zig": {
+    "url": "https://ziglang.org/download/0.14.1/zig-x86_64-windows-0.14.1.zip",
+    "sha256": "554f5378228923ffd558eac35e21af020c73789d87afeabf4bfd16f2e6feed2c",
+    "format": "zip",
+    "directory": "zig-x86_64-windows-0.14.1"
+  },
+  "git": {
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/PortableGit-2.55.0.5-64-bit.7z.exe",
+    "sha256": "5aa8a20f6e9abb2c755f0e73c91c687701a46b309ad84a0ca6509380fa4ae290",
+    "format": "exe",
+    "directory": "."
+  },
+  "ripgrep": {
+    "url": "https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-pc-windows-msvc.zip",
+    "sha256": "d0f534024c42afd6cb4d38907c25cd2b249b79bbe6cc1dbee8e3e37c2b6e25a1",
+    "format": "zip",
+    "directory": "ripgrep-14.1.1-x86_64-pc-windows-msvc"
+  },
+  "pnpm": {
+    "url": "https://registry.npmjs.org/pnpm/-/pnpm-11.7.0.tgz",
+    "sha256": "deafa7ec98a1218b6a047289b92fbe2395c1e22d3495bb711653013218ee15ee",
+    "format": "tgz",
+    "directory": "package"
+  }
+}

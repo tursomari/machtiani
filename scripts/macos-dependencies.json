@@ -1,0 +1,50 @@
+{
+  "node-x64": {
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-darwin-x64.tar.gz",
+    "sha256": "d1b5e999db158c62fe8f7267a4476b035d8bd93b1a605bac24a3f0dd166e3316"
+  },
+  "node-arm64": {
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-darwin-arm64.tar.gz",
+    "sha256": "8294b7aa9b03997481c06babf1e8b270c859358f27da57a11509afe537ac381d"
+  },
+  "go-amd64": {
+    "url": "https://go.dev/dl/go1.26.8.darwin-amd64.tar.gz",
+    "sha256": "186be014105aa6542b767d2c6ed5cca10a0214bdff809ef1724022a8c7894150"
+  },
+  "git-lfs-amd64": {
+    "url": "https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-darwin-amd64-v3.7.1.zip",
+    "sha256": "b5b1b641c0648c83661fa9eda991cd3eff945264dabc2cdf411a80dfe7ec0970"
+  },
+  "go-arm64": {
+    "url": "https://go.dev/dl/go1.26.8.darwin-arm64.tar.gz",
+    "sha256": "a012b25b571bd0138a03dcd25375ceba866fe5ca822f426d2c66a4de56fd3f4b"
+  },
+  "git-lfs-arm64": {
+    "url": "https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-darwin-arm64-v3.7.1.zip",
+    "sha256": "76260fb34f4ee622ff0a66b857e5954aa49c7e343a92e57a1ec4a760618c94b2"
+  },
+  "rg-x86_64": {
+    "url": "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-apple-darwin.tar.gz",
+    "sha256": "af7825fcc69a2afc7a7aea55fc9af90e26421d8f20fe59df32e233c0b8a231c1"
+  },
+  "rg-aarch64": {
+    "url": "https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-aarch64-apple-darwin.tar.gz",
+    "sha256": "3750b2e93f37e0c692657da574d7019a101c0084da05a790c83fd335bad973e4"
+  },
+  "bash": {
+    "url": "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
+    "sha256": "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba"
+  },
+  "coreutils": {
+    "url": "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.gz",
+    "sha256": "0898a90191c828e337d5e4e4feb71f8ebb75aacac32c434daf5424cda16acb42"
+  },
+  "sed": {
+    "url": "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.gz",
+    "sha256": "d1478a18f033a73ac16822901f6533d30b6be561bcbce46ffd7abce93602282e"
+  },
+  "pnpm": {
+    "url": "https://registry.npmjs.org/pnpm/-/pnpm-11.7.0.tgz",
+    "sha256": "deafa7ec98a1218b6a047289b92fbe2395c1e22d3495bb711653013218ee15ee"
+  }
+}

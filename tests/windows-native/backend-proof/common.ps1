@@ -1,0 +1,32 @@
+if($env:COMPUTERNAME -ne 'DM-WIN-TEST'){throw 'This fixture is restricted to the disposable DM-WIN-TEST guest'}
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+$OutputEncoding=[Console]::OutputEncoding
+$work=Join-Path $env:USERPROFILE 'windows-proof'
+$proof=Join-Path $work 'backend-proof'
+$install=Join-Path $env:LOCALAPPDATA ('Dear Machine '+[char]0x03A9)
+$env:HOME=$env:USERPROFILE
+$env:PATH="$proof\bin;$proof\omp;$work\node-v24.19.0-win-x64;$work\git\bin;$work\git\usr\bin;$install\bin;$env:PATH"
+$env:DEARMACHINE_HOME=Join-Path $proof 'dm-home'
+$env:DEARMACHINE_BACKENDS='["codex","codex-yolo","claude","omp","forge"]'
+$env:CLAUDE_CODE_GIT_BASH_PATH=Join-Path $work 'git\bin\bash.exe'
+$env:CLAUDE_CONFIG_DIR=Join-Path $proof 'claude-config'
+$env:ANTHROPIC_BASE_URL='https://api.deepinfra.com/anthropic'
+$env:ANTHROPIC_MODEL='zai-org/GLM-5.3'
+$env:ANTHROPIC_DEFAULT_HAIKU_MODEL='zai-org/GLM-5.3'
+$env:ANTHROPIC_DEFAULT_SONNET_MODEL='zai-org/GLM-5.3'
+$env:ANTHROPIC_DEFAULT_OPUS_MODEL='zai-org/GLM-5.3'
+$env:CLAUDE_CODE_EFFORT_LEVEL='high'
+$env:CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1'
+$env:DISABLE_AUTOUPDATER='1'
+$env:DEEPINFRA_API_KEY=[IO.File]::ReadAllText((Join-Path $proof 'deepinfra-key')).Trim()
+$env:ANTHROPIC_AUTH_TOKEN=$env:DEEPINFRA_API_KEY
+$env:CODEX_HOME=Join-Path $proof 'codex-config'
+New-Item -ItemType Directory -Force "$proof\bin",$env:DEARMACHINE_HOME,$env:CLAUDE_CONFIG_DIR,$env:CODEX_HOME | Out-Null
+$manager=Join-Path $install 'bin\agent-manager.exe'
+$codexBin="$proof\npm\node_modules\@openai\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin"
+$claudeBin="$proof\npm\node_modules\@anthropic-ai\claude-code-win32-x64"
+$env:PATH="$codexBin;$claudeBin;$env:PATH"
+$env:FORGE_CONFIG=Join-Path $proof 'forge-config'
+$env:FORGE_TERM='false'
+$env:PATH="$work\downloads;$env:PATH"
+if($env:PROOF_API_ORIGIN){$env:ANTHROPIC_BASE_URL=$env:PROOF_API_ORIGIN+'/anthropic'}

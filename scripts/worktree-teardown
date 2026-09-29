@@ -1,0 +1,84 @@
+#!/bin/sh
+# worktree-teardown -- remove a disposable parallel-development worktree
+#
+# Usage: worktree-teardown <worktree-path>
+#
+# The command refuses dirty worktrees and preserves branches not yet landed.
+
+set -eu
+
+usage() {
+    echo "Usage: worktree-teardown <worktree-path>" >&2
+}
+
+if [ "$#" -ne 1 ]; then
+    usage
+    exit 2
+fi
+
+wt=$1
+sidecar="$wt.base"
+
+if [ ! -d "$wt" ]; then
+    echo "ERROR: worktree path does not exist or is not a directory: $wt" >&2
+    exit 1
+fi
+
+if ! git -C "$wt" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "ERROR: path is not a git worktree: $wt" >&2
+    exit 1
+fi
+
+if [ ! -f "$sidecar" ]; then
+    echo "ERROR: sidecar not found: $sidecar" >&2
+    echo "Pass the worktree path created by worktree-setup." >&2
+    exit 1
+fi
+
+sub=$(sed -n 's/^sub=//p' "$sidecar" | sed -n '1p')
+name=$(sed -n 's/^name=//p' "$sidecar" | sed -n '1p')
+guard=$(sed -n 's/^guard=//p' "$sidecar" | sed -n '1p')
+
+if [ -z "$sub" ] || [ -z "$name" ]; then
+    echo "ERROR: sidecar is missing submodule or worktree-name metadata: $sidecar" >&2
+    echo "Pass the worktree path created by worktree-setup." >&2
+    exit 1
+fi
+
+if [ ! -d "$sub" ] || ! git -C "$sub" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "ERROR: sidecar submodule path is not a git worktree: $sub" >&2
+    exit 1
+fi
+
+if ! git -C "$sub" worktree remove "$wt"; then
+    echo "ERROR: worktree removal failed; commit the work or inspect the dirty worktree before retrying" >&2
+    exit 1
+fi
+
+git -C "$sub" worktree prune
+
+if [ -n "$guard" ]; then
+    case "$guard" in
+        "$wt.guard-hooks")
+            if [ -f "$guard/pre-push" ]; then
+                unlink "$guard/pre-push"
+            fi
+            if ! rmdir "$guard"; then
+                echo "WARNING: guard directory was not empty and remains in place: $guard" >&2
+            fi
+            ;;
+        *) echo "WARNING: unexpected guard path left in place: $guard" >&2 ;;
+    esac
+fi
+
+branch="wt/$name"
+if git -C "$sub" show-ref --verify --quiet "refs/heads/$branch"; then
+    if git -C "$sub" merge-base --is-ancestor "$branch" HEAD; then
+        git -C "$sub" branch -d "$branch"
+    else
+        echo "WARNING: branch is not landed and was left in place: $branch" >&2
+    fi
+fi
+
+unlink "$sidecar"
+printf 'Removed worktree %s and pruned its administrative state.\n' "$wt"

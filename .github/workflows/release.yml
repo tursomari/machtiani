@@ -1,0 +1,236 @@
+# Build Dear Machine release downloads and publish them as a draft GitHub
+# release with an attested SHA256SUMS. A maintainer publishes the draft.
+#
+# Pushing a v* tag builds every supported target. Run the workflow manually to
+# build a draft for a chosen tag and a subset of targets.
+#
+# While the submodules are private, add a read-only token that can read them as
+# the SUBMODULE_READ_TOKEN secret. Attestation runs only once this repository is
+# public (or on a plan that supports attestations for private repositories).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag for the draft, such as v0.1.0-rc.1
+        required: true
+      targets:
+        description: Comma-separated targets to build
+        required: true
+        default: linux-x64,linux-arm64,darwin-arm64,darwin-x64,windows-x64
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      windows: ${{ steps.plan.outputs.windows }}
+    steps:
+      - id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_TARGETS: ${{ inputs.targets }}
+          CONFIGURED_TARGETS: ${{ vars.RELEASE_TARGETS }}
+          PRIVATE: ${{ github.event.repository.private }}
+        shell: python3 {0}
+        run: |
+          import json, os, re
+          runners = {'linux-x64': 'ubuntu-24.04', 'linux-arm64': 'ubuntu-24.04-arm',
+                     'darwin-arm64': 'macos-15', 'darwin-x64': 'macos-15-intel',
+                     'windows-x64': 'windows-2025'}
+          if os.environ['EVENT'] == 'push':
+              tag = os.environ['REF_NAME']
+              # The RELEASE_TARGETS variable overrides the defaults. macOS minutes
+              # cost ten times Linux minutes in private repositories.
+              requested = [name.strip() for name in os.environ['CONFIGURED_TARGETS'].split(',') if name.strip()]
+              if not requested:
+                  private = os.environ['PRIVATE'] == 'true'
+                  requested = [name for name in runners if not (private and name.startswith('darwin-'))]
+          else:
+              tag = os.environ['INPUT_TAG']
+              requested = [name.strip() for name in os.environ['INPUT_TARGETS'].split(',') if name.strip()]
+          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?', tag):
+              raise SystemExit(f'Invalid release tag: {tag}')
+          unknown = sorted(set(requested) - set(runners))
+          if unknown or not requested:
+              raise SystemExit('Unsupported targets: ' + ', '.join(unknown or ['(none)']))
+          matrix = [dict(target=name, runner=runners[name]) for name in runners if name in requested]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'tag={tag}\nmatrix={json.dumps(matrix)}\n')
+              output.write(f"windows={'true' if 'windows-x64' in requested else 'false'}\n")
+
+  build:
+    needs: plan
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      TAG: ${{ needs.plan.outputs.tag }}
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The repository itself is checked out with the workflow token. Only the
+      # component submodules use SUBMODULE_READ_TOKEN, while they are private.
+      - name: Check out submodules
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.SUBMODULE_READ_TOKEN || github.token }}
+        run: |
+          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" submodule update --init
+
+      # The Docker build, runtime, archive, and relocation check need several GB.
+      - name: Free runner disk space
+        if: runner.os == 'Linux'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h / "$RUNNER_TEMP"
+
+      - name: Build Linux or macOS download
+        if: runner.os != 'Windows'
+        run: python3 scripts/release-build.py --target "$TARGET" --tag "$TAG" --repository "$GITHUB_REPOSITORY" --output "$RUNNER_TEMP/dist"
+
+      # Install the download the way its bootstrap does for a user, on this
+      # target's own hardware, and run the installed commands.
+      - name: Activate the download in a scratch home
+        if: runner.os != 'Windows'
+        run: |
+          home="$RUNNER_TEMP/activation-home"
+          mkdir -p "$home"
+          env -i HOME="$home" PATH=/usr/bin:/bin TERM=dumb \
+            sh "$RUNNER_TEMP/dist/dearmachine-$TAG-$TARGET.bootstrap.sh" "$RUNNER_TEMP/dist/dearmachine-$TAG-$TARGET.tar.gz"
+          for probe in dearmachine:--help machtiani:--version agent-manager:--help machtiani-installer:--help; do
+            env -i HOME="$home" PATH=/usr/bin:/bin "$home/.local/bin/${probe%%:*}" "${probe#*:}" >/dev/null
+            echo "Installed ${probe%%:*} runs."
+          done
+
+      - name: Build Windows bundle
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & .\scripts\prepare-windows.ps1 -SourceRoot $PWD -Cache (Join-Path $env:RUNNER_TEMP 'c') -BundleOutput (Join-Path $env:RUNNER_TEMP 'b')
+
+      - name: Package Windows download
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dist = (New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'dist')).FullName
+          $zip = Join-Path $dist "dearmachine-$env:TAG-$env:TARGET.zip"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $env:RUNNER_TEMP 'b'), $zip, [IO.Compression.CompressionLevel]::Optimal, $false)
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-${{ matrix.target }}
+          path: ${{ runner.temp }}/dist/*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  # Install the Windows download the way install.ps1 would and run it.
+  check-windows:
+    needs: [plan, build]
+    if: needs.plan.outputs.windows == 'true'
+    runs-on: windows-2025
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ needs.plan.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-windows-x64
+          path: ${{ runner.temp }}/dist
+
+      - name: Install and run the Windows download
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rendered = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'rendered')
+          python scripts/render-release-installers.py --repository $env:GITHUB_REPOSITORY --tag $env:TAG --source-ref $env:GITHUB_REF --output $rendered.FullName
+          if ($LASTEXITCODE -ne 0) { throw 'Rendering the installers failed.' }
+          & .\scripts\release-check-windows.ps1 -Zip (Join-Path $env:RUNNER_TEMP "dist\dearmachine-$env:TAG-windows-x64.zip") -Installer (Join-Path $rendered.FullName 'install.ps1')
+
+  release:
+    needs: [plan, build, check-windows]
+    if: ${{ !cancelled() && needs.build.result == 'success' && contains(fromJSON('["success", "skipped"]'), needs.check-windows.result) }}
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      TAG: ${{ needs.plan.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: release-*
+          path: ${{ runner.temp }}/dist
+          merge-multiple: true
+
+      - name: Render installers and checksums
+        run: |
+          dist="$RUNNER_TEMP/dist"
+          python3 scripts/render-release-installers.py --repository "$GITHUB_REPOSITORY" --tag "$TAG" --source-ref "$GITHUB_REF" --output "$dist"
+          cd "$dist"
+          find . -maxdepth 1 -type f -printf '%f\0' | sort -z | xargs -0 sha256sum -- > "$RUNNER_TEMP/SHA256SUMS"
+          mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Attest release files
+        id: attest
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/dist/*
+
+      # Installers verify with this signed bundle, so gh need not be signed in.
+      # It is self-authenticating and therefore not listed in SHA256SUMS.
+      - name: Publish attestation bundle
+        if: ${{ steps.attest.outcome == 'success' }}
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: cp -- "$BUNDLE" "$RUNNER_TEMP/dist/attestation.sigstore.json"
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ATTESTED: ${{ !github.event.repository.private }}
+        run: |
+          notes="Draft built from $GITHUB_SHA by run $GITHUB_RUN_ID."
+          if [ "$ATTESTED" != true ]; then
+            notes="$notes UNATTESTED: this repository was private when it was built. Do not publish."
+          fi
+          verify=
+          if [ "$GITHUB_REF_TYPE" = tag ]; then verify=--verify-tag; fi
+          gh release create "$TAG" --draft $verify --target "$GITHUB_SHA" --title "Dear Machine $TAG" \
+            --notes "$notes" "$RUNNER_TEMP"/dist/*

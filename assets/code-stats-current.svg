@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -16 928 643" width="928" height="643" role="img" aria-labelledby="t d">
+<title id="t">Machtiani code statistics by repository</title>
+<desc id="d">The umbrella repository contains 19,486 of the 240,890 lines of source in the four repositories. Together they contain 67 percent Go, 16 percent TypeScript, 10 percent Shell, and 5 percent Python. machtiani-harness: 118,831 lines; Dear Machine: 62,160 lines; dearmachine-concierge: 40,413 lines; machtiani (root repo): 19,486 lines.</desc>
+<style>
+svg{--ink:#1B1F27;--muted:#5B6270;--faint:#8A909B;--line:#D5D9E0}
+@media (prefers-color-scheme:dark){svg{--ink:#E8EAEE;--muted:#9AA1AD;--faint:#79808C;--line:#343A46}}
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","IBM Plex Sans",Helvetica,Arial,sans-serif}
+.title{font-size:23px;font-weight:600;fill:var(--ink)}
+.sub{font-size:14px;fill:var(--muted)}
+.h{font-size:15px;font-weight:600;fill:var(--ink)}
+.h2{font-size:13px;font-weight:600;fill:var(--muted);letter-spacing:.04em}
+.note{font-size:12px;fill:var(--muted)}
+.rl{font-size:13px;font-weight:500;fill:var(--ink)}
+.rs{font-size:11px;fill:var(--faint)}
+.rv{font-size:13px;font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
+.in{font-size:11px;font-weight:600}
+.lg{font-size:12px;fill:var(--ink)}
+.lgv{font-size:12px;fill:var(--faint);font-variant-numeric:tabular-nums}
+.foot{font-size:11px;fill:var(--faint)}
+.rule{stroke:var(--line);stroke-width:1}
+.f-go{fill:#2a78d6}.i-go{fill:#0b0b0b}.f-ts{fill:#eb6834}.i-ts{fill:#0b0b0b}.f-sh{fill:#1baf7a}.i-sh{fill:#0b0b0b}.f-py{fill:#eda100}.i-py{fill:#0b0b0b}.f-js{fill:#e87ba4}.i-js{fill:#0b0b0b}.f-nix{fill:#008300}.i-nix{fill:#ffffff}.f-tla{fill:#e34948}.i-tla{fill:#0b0b0b}.f-oth{fill:#898781}.i-oth{fill:#0b0b0b}
+@media (prefers-color-scheme:dark){.f-go{fill:#3987e5}.i-go{fill:#0b0b0b}.f-ts{fill:#d95926}.i-ts{fill:#0b0b0b}.f-sh{fill:#199e70}.i-sh{fill:#0b0b0b}.f-py{fill:#c98500}.i-py{fill:#0b0b0b}.f-js{fill:#d55181}.i-js{fill:#0b0b0b}.f-nix{fill:#008300}.i-nix{fill:#ffffff}.f-tla{fill:#e66767}.i-tla{fill:#0b0b0b}.f-oth{fill:#898781}.i-oth{fill:#0b0b0b}}
+</style>
+<text class="title" x="0" y="26">Where the code actually lives</text>
+<text class="sub" x="0" y="50">GitHub’s language bar reads one repository. Machtiani is four — 240,890 lines of code in all.</text>
+<line class="rule" x1="0" y1="72" x2="880" y2="72"/>
+<text class="h" x="0" y="92">Umbrella repository alone</text>
+<text class="note" x="880" y="92" text-anchor="end">19,486 lines · 8% of the project</text>
+<path class="f-go" d="M4.0 106H65.9V136H4.0a4 4 0 0 1 -4 -4V110a4 4 0 0 1 4 -4Z"/>
+<text class="in i-go" x="33.0" y="121.0" text-anchor="middle" dominant-baseline="central">Go</text>
+<path class="f-sh" d="M67.9 106H444.9V136H67.9Z"/>
+<text class="in i-sh" x="256.4" y="121.0" text-anchor="middle" dominant-baseline="central">Shell 43.4%</text>
+<path class="f-py" d="M446.9 106H803.2V136H446.9Z"/>
+<text class="in i-py" x="625.0" y="121.0" text-anchor="middle" dominant-baseline="central">Python 41.0%</text>
+<path class="f-js" d="M805.2 106H853.1V136H805.2Z"/>
+<path class="f-nix" d="M855.1 106H859.1V136H855.1Z"/>
+<path class="f-oth" d="M861.1 106H876.0a4 4 0 0 1 4 4V132a4 4 0 0 1 -4 4H861.1Z"/>
+<text class="note" x="0" y="156">The root repo holds glue, tests and scripts. GitHub’s language bar misses the product submodules and 92% of the code.</text>
+<line class="rule" x1="0" y1="192" x2="880" y2="192"/>
+<text class="h" x="0" y="214">What the four repositories contain</text>
+<text class="note" x="880" y="214" text-anchor="end">240,890 lines of code</text>
+<path class="f-go" d="M4.0 228H581.9V258H4.0a4 4 0 0 1 -4 -4V232a4 4 0 0 1 4 -4Z"/>
+<text class="in i-go" x="290.9" y="243.0" text-anchor="middle" dominant-baseline="central">Go 67.4%</text>
+<path class="f-ts" d="M583.9 228H718.7V258H583.9Z"/>
+<text class="in i-ts" x="651.3" y="243.0" text-anchor="middle" dominant-baseline="central">TypeScript 15.6%</text>
+<path class="f-sh" d="M720.7 228H810.6V258H720.7Z"/>
+<text class="in i-sh" x="765.7" y="243.0" text-anchor="middle" dominant-baseline="central">Shell 10.4%</text>
+<path class="f-py" d="M812.6 228H851.8V258H812.6Z"/>
+<text class="in i-py" x="832.2" y="243.0" text-anchor="middle" dominant-baseline="central">Python</text>
+<path class="f-js" d="M853.8 228H861.9V258H853.8Z"/>
+<path class="f-tla" d="M863.9 228H868.0V258H863.9Z"/>
+<path class="f-nix" d="M870.0 228H874.0V258H870.0Z"/>
+<path class="f-oth" d="M876.0 228H876.0a4 4 0 0 1 4 4V254a4 4 0 0 1 -4 4H876.0Z"/>
+<text class="h2" x="0" y="292">By repository</text>
+<text class="rl" x="0" y="317" dominant-baseline="central">machtiani-harness</text>
+<text class="rs" x="0" y="331" dominant-baseline="central">the agent harness</text>
+<text class="rv" x="192" y="321" text-anchor="end" dominant-baseline="central">118,831</text>
+<path class="f-go" d="M212.0 308H780.9V334H212.0a4 4 0 0 1 -4 -4V312a4 4 0 0 1 4 -4Z"/>
+<text class="in i-go" x="494.5" y="321.0" text-anchor="middle" dominant-baseline="central">Go 87.1%</text>
+<path class="f-sh" d="M782.9 308H857.0V334H782.9Z"/>
+<path class="f-py" d="M859.0 308H868.0V334H859.0Z"/>
+<path class="f-nix" d="M870.0 308H874.0V334H870.0Z"/>
+<path class="f-oth" d="M876.0 308H876.0a4 4 0 0 1 4 4V330a4 4 0 0 1 -4 4H876.0Z"/>
+<text class="rl" x="0" y="359" dominant-baseline="central">Dear Machine</text>
+<text class="rs" x="0" y="373" dominant-baseline="central">the email client and service</text>
+<text class="rv" x="192" y="363" text-anchor="end" dominant-baseline="central">62,160</text>
+<path class="f-go" d="M212.0 350H814.2V376H212.0a4 4 0 0 1 -4 -4V354a4 4 0 0 1 4 -4Z"/>
+<text class="in i-go" x="511.1" y="363.0" text-anchor="middle" dominant-baseline="central">Go 92.1%</text>
+<path class="f-sh" d="M816.2 350H840.3V376H816.2Z"/>
+<path class="f-py" d="M842.3 350H851.9V376H842.3Z"/>
+<path class="f-tla" d="M853.9 350H866.1V376H853.9Z"/>
+<path class="f-nix" d="M868.1 350H874.0V376H868.1Z"/>
+<path class="f-oth" d="M876.0 350H876.0a4 4 0 0 1 4 4V372a4 4 0 0 1 -4 4H876.0Z"/>
+<text class="rl" x="0" y="401" dominant-baseline="central">dearmachine-concierge</text>
+<text class="rs" x="0" y="415" dominant-baseline="central">the cross-platform installer</text>
+<text class="rv" x="192" y="405" text-anchor="end" dominant-baseline="central">40,413</text>
+<path class="f-ts" d="M212.0 392H820.4V418H212.0a4 4 0 0 1 -4 -4V396a4 4 0 0 1 4 -4Z"/>
+<text class="in i-ts" x="514.2" y="405.0" text-anchor="middle" dominant-baseline="central">TypeScript 93.0%</text>
+<path class="f-sh" d="M822.4 392H838.0V418H822.4Z"/>
+<path class="f-py" d="M840.0 392H847.0V418H840.0Z"/>
+<path class="f-js" d="M849.0 392H868.0V418H849.0Z"/>
+<path class="f-nix" d="M870.0 392H874.0V418H870.0Z"/>
+<path class="f-oth" d="M876.0 392H876.0a4 4 0 0 1 4 4V414a4 4 0 0 1 -4 4H876.0Z"/>
+<text class="rl" x="0" y="443" dominant-baseline="central">machtiani (root repo)</text>
+<text class="rs" x="0" y="457" dominant-baseline="central">glue, tests and scripts</text>
+<text class="rv" x="192" y="447" text-anchor="end" dominant-baseline="central">19,486</text>
+<path class="f-go" d="M212.0 434H258.1V460H212.0a4 4 0 0 1 -4 -4V438a4 4 0 0 1 4 -4Z"/>
+<text class="in i-go" x="233.0" y="447.0" text-anchor="middle" dominant-baseline="central">Go</text>
+<path class="f-sh" d="M260.1 434H546.5V460H260.1Z"/>
+<text class="in i-sh" x="403.3" y="447.0" text-anchor="middle" dominant-baseline="central">Shell 43.4%</text>
+<path class="f-py" d="M548.5 434H819.2V460H548.5Z"/>
+<text class="in i-py" x="683.9" y="447.0" text-anchor="middle" dominant-baseline="central">Python 41.0%</text>
+<path class="f-js" d="M821.2 434H857.6V460H821.2Z"/>
+<path class="f-nix" d="M859.6 434H863.6V460H859.6Z"/>
+<path class="f-oth" d="M865.6 434H876.0a4 4 0 0 1 4 4V456a4 4 0 0 1 -4 4H865.6Z"/>
+<line class="rule" x1="0" y1="484" x2="880" y2="484"/>
+<rect class="f-go" x="0" y="502" width="10" height="10" rx="2"/>
+<text class="lg" x="16" y="510">Go</text>
+<text class="lgv" x="44" y="510">162,276</text>
+<rect class="f-ts" x="176" y="502" width="10" height="10" rx="2"/>
+<text class="lg" x="192" y="510">TypeScript</text>
+<text class="lgv" x="262" y="510">37,603</text>
+<rect class="f-sh" x="352" y="502" width="10" height="10" rx="2"/>
+<text class="lg" x="368" y="510">Shell</text>
+<text class="lgv" x="403" y="510">25,071</text>
+<rect class="f-py" x="528" y="502" width="10" height="10" rx="2"/>
+<text class="lg" x="544" y="510">Python</text>
+<text class="lgv" x="586" y="510">10,932</text>
+<rect class="f-js" x="704" y="502" width="10" height="10" rx="2"/>
+<text class="lg" x="720" y="510">JavaScript</text>
+<text class="lgv" x="790" y="510">2,240</text>
+<rect class="f-tla" x="0" y="524" width="10" height="10" rx="2"/>
+<text class="lg" x="16" y="532">TLA+</text>
+<text class="lgv" x="44" y="532">1,150</text>
+<rect class="f-nix" x="176" y="524" width="10" height="10" rx="2"/>
+<text class="lg" x="192" y="532">Nix</text>
+<text class="lgv" x="220" y="532">928</text>
+<rect class="f-oth" x="352" y="524" width="10" height="10" rx="2"/>
+<text class="lg" x="368" y="532">Other</text>
+<text class="lgv" x="403" y="532">690</text>
+<text class="foot" x="0" y="566">Lines in git-tracked source files, including tests; prose, config, data and lockfiles are excluded, as are nested third-party submodules.</text>
+<text class="foot" x="0" y="581">PowerShell counts as Shell. Other includes Dockerfile, Expect, C# and the 37-line Go policy file verified by Gobra.</text>
+<text class="foot" x="0" y="596">Tiny segments have a minimum width for visibility. Counts use the checked-out umbrella repo and its pinned submodule commits.</text>
+</svg>
