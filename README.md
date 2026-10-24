@@ -121,7 +121,7 @@ The instructor, ReAct worker, and backend agents can each use independent models
 
 Each kick-off can run for one turn or many depending on the task complexity. Reply in the same thread to continue or change the goal, while other threads carry on independently.
 
-For more on the reasoning behind this, see the [blog post](https://www.machtiani.chat/blogs/the-shell).
+For more on the reasoning behind this, see the [blog post](https://machtiani.chat/blogs/the-shell-and-email/).
 
 ## Use with OpenClaw-like agents
 
